@@ -1,127 +1,124 @@
 # Lab#9 – Test Double (Stub & Mock)
 
-CP353201 Software Quality Assurance, College of Computing, Khon Kaen University
-ปีการศึกษา 1/2569 · Instructor: Asst.Prof. Chitsutha Soomlek
+CP353201 การประกันคุณภาพซอฟต์แวร์ (Software Quality Assurance), วิทยาลัยการคอมพิวเตอร์ มหาวิทยาลัยขอนแก่น
+ปีการศึกษา 1/2569 · ผู้สอน: Asst.Prof. Chitsutha Soomlek
 
-## How to run
+## วิธีรัน
 
 ```bash
 mvn test
 ```
 
-Requires Java 11+ and internet access the first time (Maven downloads
-JUnit 5.14.4 and Mockito 5.14.0 from Maven Central).
+ต้องใช้ Java 11+ และต้องมีอินเทอร์เน็ตในการรันครั้งแรก (Maven จะดาวน์โหลด
+JUnit 5.14.4 และ Mockito 5.14.0 จาก Maven Central)
 
-## Project layout
+## โครงสร้างโปรเจกต์
 
 ```
 src/main/java/
-  com/kku/sqa/lab9/playlist/   Activity 9.1 – NowPlaying / MovieService / MoviePortal
-  sqa/lab/service/             Activity 9.2 – the professor's starter classes,
-                               copied as-is from testdouble-mockito-lab:
+  com/kku/sqa/lab9/playlist/   ข้อ 9.1 – NowPlaying / MovieService / MoviePortal
+  sqa/lab/service/             ข้อ 9.2 – คลาส starter ของอาจารย์
+                               คัดลอกมาจาก testdouble-mockito-lab แบบไม่แก้ไข:
                                SeatDAO, SeatReservation, TicketCounter, GateCheckin
 
 src/test/java/
-  com/kku/sqa/lab9/playlist/   NowPlayingTest + a hand-written Stub
-  sqa/lab/service/             SeatReservationTest, GateCheckinTest (Mockito mocks)
+  com/kku/sqa/lab9/playlist/   NowPlayingTest + Stub ที่เขียนขึ้นเอง
+  sqa/lab/service/             SeatReservationTest, GateCheckinTest (ใช้ Mockito mock)
 ```
 
-## Activity 9.1 – Stub
+## ข้อ 9.1 – Stub
 
-**Dependency analysis**
+**การวิเคราะห์ dependency**
 
 ```
 Class NowPlaying  --->  <<interface>> MovieService  --->  <<external>> MoviePortal
 ```
 
-`NowPlaying` (the SUT) only depends on the `MovieService` interface. The
-real `MovieServiceImpl` forwards requests to the external `MoviePortal`
-(a third-party movie-listing provider), which is the part we cannot and
-should not call from a unit test.
+`NowPlaying` (System Under Test) พึ่งพาแค่ interface `MovieService` เท่านั้น
+ส่วน `MovieServiceImpl` ตัวจริงจะส่งต่อ request ไปยัง `MoviePortal` ภายนอก
+(ผู้ให้บริการข้อมูลหนังจากบุคคลที่สาม) ซึ่งเป็นส่วนที่เราไม่สามารถและไม่ควรเรียกจริง
+ตอนเทส unit test
 
-**Test Double used:** a hand-written **Stub** (`StubMovieService`) that
-implements `MovieService` and always returns a fixed list of five movies
-across several cinema types (VIP, IMAX Laser, Standard, 4DX). It has no
-verification/expectation logic — it just supplies canned data so
-`NowPlaying`'s own filtering logic can be exercised deterministically.
+**Test Double ที่ใช้:** เขียน **Stub** ขึ้นเอง (`StubMovieService`) ที่ implement
+`MovieService` และคืนค่ารายการหนังตายตัว 5 รายการ ครอบคลุมหลายประเภทโรงหนัง
+(VIP, IMAX Laser, Standard, 4DX) โดย Stub นี้ไม่มี logic ตรวจสอบ/คาดหวังการเรียกใช้
+(verification) ใดๆ มีหน้าที่แค่ส่งข้อมูลสำเร็จรูปให้ logic การกรองของ `NowPlaying`
+ทำงานได้อย่างแน่นอน (deterministic)
 
-**What's tested:** `NowPlayingTest` verifies that
-`getMoviesByCinemaType(location, date, "VIP")` returns only the two VIP
-entries out of the five stubbed movies (plus a case-insensitivity check
-and a no-match-returns-empty-list check).
+**สิ่งที่ทดสอบ:** `NowPlayingTest` ตรวจสอบว่า
+`getMoviesByCinemaType(location, date, "VIP")` คืนเฉพาะ 2 รายการที่เป็น VIP
+จากหนังที่ stub ไว้ทั้งหมด 5 รายการ (พร้อมเคสตรวจตัวพิมพ์เล็ก/ใหญ่ และเคสไม่พบข้อมูล
+ที่ต้องคืน list ว่าง)
 
-## Activity 9.2 – Mocks (Mockito)
+## ข้อ 9.2 – Mock (Mockito)
 
-The four starter classes under `sqa.lab.service` (`SeatDAO`,
-`SeatReservation`, `TicketCounter`, `GateCheckin`) are copied verbatim
-from the professor's starter project
-(`ChitsuthaCSKKU/SQA/tree/2026/LabAssignment/Lab9_TestDouble`, mirrored
-locally in `testdouble-mockito-lab`) — nothing in `src/main/java/sqa`
-was modified, only tests were added.
+คลาส starter ทั้ง 4 คลาสภายใต้ `sqa.lab.service` (`SeatDAO`,
+`SeatReservation`, `TicketCounter`, `GateCheckin`) คัดลอกมาแบบเดิมทุกตัวอักษร
+จากโปรเจกต์ starter ของอาจารย์
+(`ChitsuthaCSKKU/SQA/tree/2026/LabAssignment/Lab9_TestDouble` ซึ่ง mirror ไว้
+ในเครื่องที่ `testdouble-mockito-lab`) — ไม่มีการแก้ไขอะไรใน `src/main/java/sqa`
+เลย มีการเพิ่มเฉพาะไฟล์เทสเท่านั้น
 
-### (a) Service: Seat Reservation
+### (ก) Service: Seat Reservation
 
 ```
 SeatReservation (SUT)
    .checkSeatAvailability(seatName)
-   ---> SeatDAO.fetchAvailableSeats()   [mocked — this is a real JDBC call
-                                          in production: DriverManager
+   ---> SeatDAO.fetchAvailableSeats()   [mock ไว้ — ในระบบจริงเป็นการเรียก JDBC จริง
+                                          ผ่าน DriverManager
                                           .getConnection("DATABASE_URL")]
 ```
 
-`SeatReservationTest` mocks `SeatDAO` with `@Mock` and stubs
-`fetchAvailableSeats()` to return a fixed list of seat names — this is
-the "available seat numbers" response required by instruction 3(a).
-Three cases are covered: the requested seat is in the mocked list, the
-seat is not in the list, and the mocked list is empty.
+`SeatReservationTest` mock `SeatDAO` ด้วย `@Mock` และ stub เมธอด
+`fetchAvailableSeats()` ให้คืนรายการชื่อที่นั่งตายตัว — นี่คือ response
+"หมายเลขที่นั่งที่ว่าง" ตามที่ข้อ 3(ก) กำหนด ครอบคลุม 3 กรณี ได้แก่
+ที่นั่งที่ขอมีอยู่ใน list ที่ mock ไว้, ที่นั่งไม่มีอยู่ใน list, และ list ที่ mock ไว้เป็นค่าว่าง
 
-### (b) Service: GateCheckin
+### (ข) Service: GateCheckin
 
 ```
 GateCheckin (SUT)
    .customerEntry(ticketId) / .customerIsEligible(ticketId)
-   ---> TicketCounter.changeTicketStatus(boolean)   [void — verified as
-                                                       an interaction]
-   ---> TicketCounter.getNoCheckinCustomer()        [mocked response —
-                                                       instruction 3(b)]
+   ---> TicketCounter.changeTicketStatus(boolean)   [void — ตรวจสอบด้วยการ
+                                                       verify การเรียกใช้งาน]
+   ---> TicketCounter.getNoCheckinCustomer()        [mock response —
+                                                       ตามข้อ 3(ข)]
 ```
 
-`GateCheckinTest` mocks `TicketCounter` with `@Mock`. Because
-`changeTicketStatus` is a void method, its call is asserted with
-Mockito's `verify(...)` (called once when a new ticket checks in, never
-called again if the same ticket id is scanned twice). A dedicated test
-stubs `getNoCheckinCustomer()` to return a fixed number, directly
-covering instruction 3(b)'s "mocked response for the count of visitors
-who have already passed gate check-in."
+`GateCheckinTest` mock `TicketCounter` ด้วย `@Mock` เนื่องจาก
+`changeTicketStatus` เป็นเมธอด void จึงตรวจสอบการเรียกใช้ด้วย Mockito
+`verify(...)` (ถูกเรียก 1 ครั้งตอนตั๋วใหม่เข้ามา และต้องไม่ถูกเรียกอีกถ้าสแกน
+ตั๋วเดิมซ้ำ) และมีเทสเฉพาะที่ stub เมธอด `getNoCheckinCustomer()` ให้คืนจำนวน
+ตายตัว ครอบคลุมข้อ 3(ข) เรื่อง "mock response สำหรับจำนวนผู้เข้าชมที่ผ่าน
+gate check-in แล้ว" โดยตรง
 
-## pom.xml notes
+## หมายเหตุเกี่ยวกับ pom.xml
 
-`junit-jupiter-api/engine` (5.14.4) and `mockito-core` /
-`mockito-junit-jupiter` (5.14.0) versions, the `maven-dependency-plugin`
-`properties` goal, and the Surefire `-javaagent:${org.mockito:mockito-core:jar}`
-argLine were all carried over from the professor's starter `pom.xml` so
-this project builds/runs the same way (Mockito 5's inline mock maker
-needs that javaagent wired up explicitly on newer JDKs).
+เวอร์ชันของ `junit-jupiter-api/engine` (5.14.4) และ `mockito-core` /
+`mockito-junit-jupiter` (5.14.0), goal `properties` ของ
+`maven-dependency-plugin`, และ argLine
+`-javaagent:${org.mockito:mockito-core:jar}` ของ Surefire ทั้งหมดนี้
+คัดลอกมาจาก `pom.xml` ของ starter ของอาจารย์ เพื่อให้โปรเจกต์นี้ build/run
+ได้เหมือนกัน (inline mock maker ของ Mockito 5 ต้องมีการตั้งค่า javaagent
+แบบนี้ชัดเจนบน JDK รุ่นใหม่ๆ)
 
-The argLine also adds `-Dnet.bytebuddy.experimental=true`. This is
-needed when running on a JDK newer than what the bundled Byte Buddy
-officially recognizes (e.g. JDK 24+, including JDK 26) — without it
-Mockito throws `Java XX is not supported by the current version of
-Byte Buddy` the moment any `@Mock` is created. If your machine runs an
-older JDK (11–21) this flag is harmless and not required.
+argLine ยังเพิ่ม `-Dnet.bytebuddy.experimental=true` เข้าไปด้วย ซึ่งจำเป็น
+เมื่อรันบน JDK ที่ใหม่กว่าที่ Byte Buddy เวอร์ชันที่ผูกมารองรับอย่างเป็นทางการ
+(เช่น JDK 24 ขึ้นไป รวมถึง JDK 26) — ถ้าไม่ตั้งค่านี้ Mockito จะ throw
+`Java XX is not supported by the current version of Byte Buddy` ทันทีที่มี
+การสร้าง `@Mock` ตัวใดก็ตาม ถ้าเครื่องคุณใช้ JDK รุ่นเก่ากว่า (11–21) flag นี้
+ไม่มีผลเสียอะไรและไม่จำเป็นต้องใช้ก็ยังรันได้ปกติ
 
-## Note on verification
+## หมายเหตุเกี่ยวกับการตรวจสอบความถูกต้อง
 
-`mvn test` has been run successfully end-to-end on a real machine
-(Windows, JDK 26): compilation of all 9 main + 4 test source files
-succeeds, and all 7 Mockito-based tests (`GateCheckinTest`,
-`SeatReservationTest`) plus all 3 `NowPlayingTest` stub tests pass —
-10/10 tests green, 0 failures.
+รัน `mvn test` บนเครื่องจริงสำเร็จครบทุกขั้นตอนแล้ว (Windows, JDK 26):
+compile ไฟล์ main 9 ไฟล์ + test 4 ไฟล์ ผ่านหมด และเทสทั้ง 7 เคสที่ใช้
+Mockito (`GateCheckinTest`, `SeatReservationTest`) รวมกับเทส Stub อีก 3
+เคสใน `NowPlayingTest` ผ่านหมด — รวม 10/10 เทสเขียว ไม่มี failure
 
-Earlier in development this project was also reviewed in an offline
-sandbox without Maven/JDK/internet access, where the code was
-desk-checked by hand (method signatures cross-referenced against every
-call site, brace/parenthesis balance checked programmatically, and each
-Mockito test's execution path traced against `MockitoExtension`'s
-strict-stubbing rule) — that review is now confirmed correct by the
-actual `mvn test` run above.
+ก่อนหน้านี้ในขั้นตอนพัฒนา โปรเจกต์นี้ยังถูกตรวจทานในแซนด์บ็อกซ์ที่ไม่มี
+Maven/JDK/อินเทอร์เน็ต โดยตรวจด้วยมือ (cross-reference method signature
+กับจุดที่เรียกใช้ทุกจุด, ตรวจสอบความสมดุลของวงเล็บ/ปีกกาด้วยสคริปต์, และ
+ไล่ execution path ของแต่ละเทส Mockito เทียบกับกฎ strict stubbing ของ
+`MockitoExtension`) — การตรวจทานนั้นได้รับการยืนยันว่าถูกต้องแล้วจากผลการรัน
+`mvn test` จริงข้างต้น
