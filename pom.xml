@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.kku.sqa</groupId>
+    <artifactId>lab9-testdouble</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Lab9 - Test Double (Stub &amp; Mock)</name>
+    <description>
+        CP353201 Software Quality Assurance - Lab#9 Test Double.
+        Activity 9.1: Stub-based unit test for the NowPlaying / MovieService / MoviePortal playlist feature.
+        Activity 9.2: Mockito-based mock tests for the Seat Reservation and GateCheckin services.
+    </description>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Matches the versions used in the professor's starter pom.xml
+             (testdouble-mockito-lab) so this project builds the same way. -->
+        <junit.version>5.14.4</junit.version>
+        <mockito.version>5.14.0</mockito.version>
+    </properties>
+
+    <dependencies>
+        <!-- JUnit 5 (Jupiter) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>lab9-testdouble</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>11</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Required so ${org.mockito:mockito-core:jar} below resolves
+                     to the actual mockito-core jar path on the classpath. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <!-- Mockito 5's inline mock maker self-attaches a Byte Buddy
+                         agent at runtime; on newer JDKs this must instead be
+                         loaded up front via -javaagent (same fix as the
+                         professor's starter pom.xml), otherwise a warning /
+                         failure can occur when creating mocks.
+
+                         -Dnet.bytebuddy.experimental=true is required on JDKs
+                         newer than the ones Byte Buddy officially recognizes
+                         (e.g. JDK 24+, including JDK 26) - without it Mockito
+                         throws "Java XX is not supported by the current
+                         version of Byte Buddy" when trying to mock any class. -->
+                    <argLine>
+                        -javaagent:${org.mockito:mockito-core:jar}
+                        -Xshare:off
+                        -Dnet.bytebuddy.experimental=true
+                    </argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
